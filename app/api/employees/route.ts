@@ -86,7 +86,12 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: 'Missing id' }, { status: 400 });
   }
   try {
+    const employeeFound = await prisma.employee.findUnique({ where: { id } });
+    if (!employeeFound) {
+      return NextResponse.json({ error: 'Employee not found' }, { status: 404 });
+    }
     await prisma.employee.delete({ where: { id } });
+    await prisma.user.delete({ where: { id: employeeFound.userId } });
     return NextResponse.json({ success: true });
   } catch (err) {
     return NextResponse.json({ error: 'DB error' }, { status: 400 });

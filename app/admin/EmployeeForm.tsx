@@ -1,6 +1,7 @@
 "use client";
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import Toastr from '../components/Toastr';
 
 type EmployeeFormProps = {
   initialData?: {
@@ -26,6 +27,7 @@ const EmployeeForm = ({ initialData }: EmployeeFormProps) => {
   });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showToast, setShowToast] = useState({ isVisible: false, message: '', type: 'success' });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -51,13 +53,21 @@ const EmployeeForm = ({ initialData }: EmployeeFormProps) => {
     if (!res.ok) {
       const data = await res.json();
       setError(data.error || 'An error occurred');
+      setShowToast({ isVisible: true, message: `Error ${isNew ? 'adding' : 'updating'} employee!`, type: 'error' });
+      setTimeout(() => setShowToast({ isVisible: false, message: '', type: 'success' }), 3000);
+      
       return;
     }
+    setShowToast({ isVisible: true, message: `Successfully ${isNew ? 'added' : 'updated'} employee!`, type: 'success' });
+    setTimeout(() => setShowToast({ isVisible: false, message: '', type: 'success' }), 3000);
     router.push('/admin');
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center">
+      {showToast.isVisible && (
+        <Toastr message={showToast.message} type={showToast.type} />
+      )}
       <div className="bg-white shadow-xl rounded-xl p-8 max-w-md w-full">
         <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">{isNew ? 'Add Employee' : 'Edit Employee'}</h1>
         {error && (

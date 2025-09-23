@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react';
+import Toastr from '../components/Toastr';
 
 
 type Employee = { id?: number; name: string; email: string; mobile: string; address: string };
@@ -9,6 +10,7 @@ const EmployeeProfile = ({ employee }: EmployeeProfileProps) => {
   const [editMode, setEditMode] = useState(false);
   const [employeeData, setEmployeeData] = useState<Employee>(employee);
   const [form, setForm] = useState<Employee>(employee);
+  const [showToast, setShowToast] = useState({ isVisible: false, message: '', type: 'success' });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -17,13 +19,19 @@ const EmployeeProfile = ({ employee }: EmployeeProfileProps) => {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     // Optionally, update on server as well
-    await fetch('/api/employees', {
+    const res=await fetch('/api/employees', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: form.id, ...form }),
     });
+     if (!res.ok) {
+      setShowToast({ isVisible: true, message: `Error updating employee!`, type: 'error' });
+      setTimeout(() => setShowToast({ isVisible: false, message: '', type: 'success' }), 3000);
+      return;
+    }
+    setShowToast({ isVisible: true, message: `Successfully updated employee!`, type: 'success' });
+    setTimeout(() => setShowToast({ isVisible: false, message: '', type: 'success' }), 3000);
     setEmployeeData(form);
-    
     setEditMode(false);
   };
 
@@ -64,6 +72,9 @@ const EmployeeProfile = ({ employee }: EmployeeProfileProps) => {
             </div>
       </div>
       <button onClick={() => setEditMode(true)} className="mt-6 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition w-full">Edit</button>
+      {showToast.isVisible && (
+        <Toastr message={showToast.message} type={showToast.type} />
+      )}
     </>
   );
 };
