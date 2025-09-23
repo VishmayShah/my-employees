@@ -64,7 +64,7 @@ const EmployeeForm = ({ initialData }: EmployeeFormProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center">
+    <div className="bg-gradient-to-br from-blue-50 to-white flex items-center justify-center min-h-[calc(100vh_-_56px)]">
       {showToast.isVisible && (
         <Toastr message={showToast.message} type={showToast.type} />
       )}

@@ -13,7 +13,7 @@ export default async function EmployeePage() {
     employee = await prisma.employee.findUnique({ where: { userId: user.id as number } });
   }
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center">
+    <div className="bg-gradient-to-br from-blue-50 to-white flex items-center justify-center min-h-[calc(100vh_-_56px)]">
       <div className="bg-white shadow-xl rounded-xl p-8 max-w-md w-full">
         <div className="flex flex-col items-center mb-6">
           <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center mb-2">
