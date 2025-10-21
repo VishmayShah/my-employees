@@ -10,7 +10,10 @@ export default async function EmployeePage() {
   const isEditMode=false;
   let employee;
   if (user) {
-    employee = await prisma.employee.findUnique({ where: { userId: user.id as number } });
+    const userDetails = await prisma.user.findUnique({ where: { id: user.id as number , role: 'employee' as any } });
+    if (!userDetails) return <div>Employee not found</div>;
+    const { password, ...rest } = userDetails!;
+    employee = rest;
   }
   return (
     <div className="bg-gradient-to-br from-blue-50 to-white flex items-center justify-center min-h-[calc(100vh_-_56px)]">

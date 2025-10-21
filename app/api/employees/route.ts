@@ -4,12 +4,17 @@ import bcrypt from 'bcryptjs';
 
 export async function FetchEmployees(page:number, pageSize:number, sort:string, order:'asc'|'desc') {
   return {
-    employees:await prisma.employee.findMany({
+    employees:await prisma.user.findMany({
+      where: { role: 'employee' },
       orderBy: { [sort]: order },
       skip: (page - 1) * pageSize,
       take: pageSize,
     }),
-    total: await prisma.employee.count()
+    total: await prisma.user.count(
+      {
+      where: { role: 'employee' }
+      }
+    )
   }
 }
 export async function GET(req: NextRequest) {
@@ -23,6 +28,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Missing query parameters' }, { status: 400 });
   }
   const employees = await FetchEmployees(+page, +pageSize, sort, order);
+  employees.employees = employees.employees.map(x => {
+    const {password,...rest}=x;
+    return rest;
+  }) as any;
   return NextResponse.json(employees);
 }
 
@@ -37,11 +46,8 @@ export async function POST(req: NextRequest) {
     const user = await prisma.user.create({
       data: { name, email, password: hashedPassword, mobile, address, role },
     });
-    // Then create employee linked to userId
-    const employee = await prisma.employee.create({
-      data: { name, email, mobile, address, userId: user.id },
-    });
-    return NextResponse.json(employee);
+    delete (user as any).password;
+    return NextResponse.json(user);
   } catch (err) {
     return NextResponse.json({ error: 'DB error' }, { status: 400 });
   }
@@ -54,15 +60,10 @@ export async function PUT(req: NextRequest) {
   }
   try {
     // Find employee
-    const employeeFound = await prisma.employee.findUnique({ where: { id } });
+    const employeeFound = await prisma.user.findUnique({ where: { id } });
     if (!employeeFound) {
       return NextResponse.json({ error: 'Employee not found' }, { status: 404 });
     }
-    // Update employee
-    const employee = await prisma.employee.update({
-      where: { id },
-      data: { name, email, mobile, address },
-    });
     // Update related user
     const userUpdateData: any = { name, email, mobile, address };
     if (password){
@@ -71,10 +72,10 @@ export async function PUT(req: NextRequest) {
     }
 
     await prisma.user.update({
-      where: { id: employeeFound.userId },
+      where: { id: employeeFound.id },
       data: userUpdateData,
     });
-    return NextResponse.json(employee);
+    return NextResponse.json({ id: employeeFound.id, ...userUpdateData });
   } catch (err) {
     return NextResponse.json({ error: 'DB error' }, { status: 400 });
   }
@@ -86,12 +87,11 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: 'Missing id' }, { status: 400 });
   }
   try {
-    const employeeFound = await prisma.employee.findUnique({ where: { id } });
+    const employeeFound = await prisma.user.findUnique({ where: { id } });
     if (!employeeFound) {
       return NextResponse.json({ error: 'Employee not found' }, { status: 404 });
     }
-    await prisma.employee.delete({ where: { id } });
-    await prisma.user.delete({ where: { id: employeeFound.userId } });
+    await prisma.user.delete({ where: { id: employeeFound.id } });
     return NextResponse.json({ success: true });
   } catch (err) {
     return NextResponse.json({ error: 'DB error' }, { status: 400 });

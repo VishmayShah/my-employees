@@ -13,11 +13,7 @@ export async function POST(req: NextRequest) {
     const user = await prisma.user.create({
       data: { name, email, password: hashedPassword, mobile, address, role },
     });
-    if (role === 'employee') {
-      await prisma.employee.create({
-        data: { name, email, mobile, address, userId: user.id },
-      });
-    }
+
     return NextResponse.json({ success: true });
   } catch (err) {
     return NextResponse.json({ error: 'User already exists or DB error' }, { status: 400 });

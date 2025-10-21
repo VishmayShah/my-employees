@@ -22,15 +22,5 @@ model User {
   mobile    String
   address   String
   role      String   // 'admin' or 'employee'
-  employee  Employee?
 }
 
-model Employee {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  mobile    String
-  address   String
-  userId    Int      @unique
-  user      User     @relation(fields: [userId], references: [id])
-}
