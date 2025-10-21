@@ -27,9 +27,10 @@ const Register = () => {
     setLoading(false);
     if (data.success) {
       setShowToast({ isVisible: true, message: `Successfully registered user!`, type: 'success' });
-      setTimeout(() => {setShowToast({ isVisible: false, message: '', type: 'success' });
-     router.push('/auth/login');}, 3000);
-     
+      setTimeout(() => {
+        setShowToast({ isVisible: false, message: '', type: 'success' });
+        router.push('/auth/login');
+      }, 3000);
     } else {
       setError(data.error || 'Registration failed');
       setTimeout(() => setShowToast({ isVisible: false, message: '', type: 'success' }), 3000);

@@ -59,8 +59,10 @@ const EmployeeForm = ({ initialData }: EmployeeFormProps) => {
       return;
     }
     setShowToast({ isVisible: true, message: `Successfully ${isNew ? 'added' : 'updated'} employee!`, type: 'success' });
-    setTimeout(() => setShowToast({ isVisible: false, message: '', type: 'success' }), 3000);
-    router.push('/admin');
+    setTimeout(() => {
+      setShowToast({ isVisible: false, message: '', type: 'success' });
+      router.push('/admin');
+    }, 3000);
   };
 
   return (
